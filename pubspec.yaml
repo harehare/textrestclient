@@ -1,0 +1,41 @@
+name: text_rest_client
+description: Simple Rest Client.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^0.1.2
+  fluro: "^1.5.1"
+  flutter_bloc: ^2.1.1
+  bloc: ^2.0.0
+  font_awesome_flutter: ^8.5.0
+  google_fonts: ^0.2.0
+  dartz: ^0.8.9
+  recase: ^2.0.1
+  dio: ^3.0.8
+  dio_http2_adapter: ^1.0.0
+  flutter_highlight: ^0.5.0
+  flushbar: ^1.9.1
+  flutter_launcher_icons: any
+  url_launcher: ^5.4.1
+  clippy: ^1.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon.png
+    - assets/icon_64.png
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
