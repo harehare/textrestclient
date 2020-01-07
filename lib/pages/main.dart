@@ -89,83 +89,86 @@ class _MainPageState extends State<MainPage> {
                             ),
                           ])),
             ]),
-        body: BlocBuilder<RequestBloc, RequestState>(builder: (context, state) {
-          return Stack(fit: StackFit.expand, children: [
-            Util.isPhone(size.width)
-                ? PageView(
-                    controller: _pageController,
-                    onPageChanged: (page) {
-                      setState(() {
-                        this._page = page;
-                      });
-                    },
-                    children: [
-                        editorWidget(context),
-                        respponseWidget(context, state)
-                      ])
-                : Column(children: [
-                    Row(
-                      children: [
-                        editorWidget(context),
-                        respponseWidget(context, state)
-                      ],
-                    )
-                  ]),
-            state.isFetching
-                ? Positioned(
-                    top: 0.0,
-                    child: Container(
-                        width: size.width,
-                        height: 3,
-                        child: LinearProgressIndicator(
-                          backgroundColor: theme.indicatorColor,
-                        )),
-                  )
-                : SizedBox.shrink(),
-            Positioned(
-              bottom: 20.0,
-              right: 20.0,
-              child: state.isFetching
-                  ? FloatingActionButton(
-                      backgroundColor: Colors.red,
-                      shape: RoundedRectangleBorder(
-                          side: BorderSide(color: Colors.black45, width: 3.0),
-                          borderRadius: BorderRadius.circular(100)),
-                      child: Icon(
-                        Icons.stop,
-                        color: Colors.white,
-                        size: 40,
-                      ),
-                      tooltip: "Cancel Request",
-                      onPressed: () => BlocProvider.of<RequestBloc>(context)
-                          .add(SendCancelEvent()),
-                    )
-                  : FloatingActionButton(
-                      backgroundColor: theme.buttonColor,
-                      shape: RoundedRectangleBorder(
-                          side: BorderSide(color: Colors.black45, width: 3.0),
-                          borderRadius: BorderRadius.circular(100)),
-                      child: Icon(
-                        Icons.play_arrow,
-                        color: Colors.black,
-                        size: 40,
-                      ),
-                      tooltip: "Send Request",
-                      onPressed: () {
-                        BlocProvider.of<RequestBloc>(context).add(SendEvent(
-                            text: _controller.selection.start !=
-                                    _controller.selection.end
-                                ? _controller.text.substring(
-                                    _controller.selection.start,
-                                    _controller.selection.end)
-                                : _controller.text));
-                        if (Util.isPhone(size.width)) {
-                          _pageController.jumpToPage(1);
-                        }
-                      }),
-            ),
-          ]);
-        }),
+        body: BlocBuilder<RequestBloc, RequestState>(
+            builder: (context, state) => Stack(fit: StackFit.expand, children: [
+                  Util.isPhone(size.width)
+                      ? PageView(
+                          controller: _pageController,
+                          onPageChanged: (page) {
+                            setState(() {
+                              this._page = page;
+                            });
+                          },
+                          children: [
+                              editorWidget(context),
+                              respponseWidget(context, state)
+                            ])
+                      : Column(children: [
+                          Row(
+                            children: [
+                              editorWidget(context),
+                              respponseWidget(context, state)
+                            ],
+                          )
+                        ]),
+                  state.isFetching
+                      ? Positioned(
+                          top: 0.0,
+                          child: Container(
+                              width: size.width,
+                              height: 3,
+                              child: LinearProgressIndicator(
+                                backgroundColor: theme.indicatorColor,
+                              )),
+                        )
+                      : SizedBox.shrink(),
+                  Positioned(
+                    bottom: 20.0,
+                    right: 20.0,
+                    child: state.isFetching
+                        ? FloatingActionButton(
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    color: Colors.black45, width: 3.0),
+                                borderRadius: BorderRadius.circular(100)),
+                            child: Icon(
+                              Icons.stop,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                            tooltip: "Cancel Request",
+                            onPressed: () =>
+                                BlocProvider.of<RequestBloc>(context)
+                                    .add(SendCancelEvent()),
+                          )
+                        : FloatingActionButton(
+                            backgroundColor: theme.buttonColor,
+                            shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    color: Colors.black45, width: 3.0),
+                                borderRadius: BorderRadius.circular(100)),
+                            child: Icon(
+                              Icons.play_arrow,
+                              color: Colors.black,
+                              size: 40,
+                            ),
+                            tooltip: "Send Request",
+                            onPressed: () {
+                              BlocProvider.of<RequestBloc>(context).add(
+                                  SendEvent(
+                                      text: _controller.selection.start !=
+                                              _controller.selection.end
+                                          ? _controller.text.substring(
+                                              _controller.selection.start,
+                                              _controller.selection.end)
+                                          : _controller.text));
+                              if (Util.isPhone(size.width)) {
+                                _pageController.jumpToPage(1);
+                              }
+                            }),
+                  ),
+                ])),
         backgroundColor: theme.backgroundColor,
         bottomNavigationBar: Util.isPhone(size.width)
             ? BottomNavigationBar(
@@ -189,43 +192,80 @@ class _MainPageState extends State<MainPage> {
   Widget editorWidget(BuildContext context) {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
-    final height =
-        Util.isPhone(size.width) ? size.height - 155 : size.height - 130;
+    final height = Util.isPhone(size.width)
+        ? (size.height - 165) / 2
+        : (size.height - 145) / 2;
 
-    return Container(
-      width: Util.isPhone(size.width) ? size.width : size.width / 2,
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-                padding: EdgeInsets.only(bottom: 8),
-                child: Text("Request", style: theme.textTheme.body1)),
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: height,
-                maxHeight: height,
+    return Column(children: [
+      Container(
+        width: Util.isPhone(size.width) ? size.width : size.width / 2,
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: Text("Request", style: theme.textTheme.body1)),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: height,
+                  maxHeight: height,
+                ),
+                child: TextField(
+                  controller: _controller,
+                  textAlignVertical: TextAlignVertical.top,
+                  expands: true,
+                  maxLines: null,
+                  keyboardType: TextInputType.multiline,
+                  style: theme.textTheme.body1,
+                  onChanged: (text) => BlocProvider.of<RequestBloc>(context)
+                      .add(InputEvent(input: text)),
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: theme.accentColor,
+                      contentPadding: EdgeInsets.all(8.0),
+                      hintText:
+                          'POST https://foo.bar\n{"Content-Type": "application/json"}\n\nPUT https://foo.bar\n{"Content-Type": "application/json"}'),
+                ),
               ),
-              child: TextField(
-                controller: _controller,
-                textAlignVertical: TextAlignVertical.top,
-                expands: true,
-                maxLines: null,
-                keyboardType: TextInputType.multiline,
-                style: theme.textTheme.body1,
-                onChanged: (text) => BlocProvider.of<RequestBloc>(context)
-                    .add(InputEvent(input: text)),
-                decoration: InputDecoration(
-                    filled: true,
-                    fillColor: theme.accentColor,
-                    contentPadding: EdgeInsets.all(8.0),
-                    hintText:
-                        'POST https://foo.bar\n{"Content-Type": "application/json"}\n\nPUT https://foo.bar\n{"Content-Type": "application/json"}'),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+      requestWidget(context),
+    ]);
+  }
+
+  Widget requestWidget(BuildContext context) {
+    final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
+    final height = Util.isPhone(size.width)
+        ? (size.height - 165) / 2
+        : (size.height - 145) / 2;
+    final width = Util.isPhone(size.width) ? size.width : size.width / 2 - 16;
+    final requests = Util.parseText(_controller.text);
+
+    return Padding(
+      padding: EdgeInsets.all(8),
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          border: Border.all(color: theme.dividerColor, width: 2.0),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+        ),
+        child: requests.length == 0
+            ? Center(child: Text("Empty request", style: theme.textTheme.body1))
+            : Scrollbar(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: requests
+                        .map((req) => RequestItem(request: req))
+                        .toList(),
+                  ),
+                ),
+              ),
       ),
     );
   }

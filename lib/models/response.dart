@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:dartz/dartz.dart';
 
-class ReplResponse {
+class HttpResponse {
   Either<String, Response> response;
-  ReplResponse({this.response});
+  HttpResponse({this.response});
 }

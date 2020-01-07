@@ -1,3 +1,4 @@
+import 'package:meta/meta.dart';
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
 import 'package:recase/recase.dart';
@@ -7,7 +8,7 @@ enum Protocol { Http11, Http2 }
 
 class HttpProtocol {
   Protocol protocol;
-  HttpProtocol({this.protocol});
+  HttpProtocol({@required this.protocol});
 
   String toString() {
     return protocol.toString().split(".")[1];
@@ -34,7 +35,7 @@ enum Method { GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH }
 
 class HttpMethod {
   Method method;
-  HttpMethod({this.method});
+  HttpMethod({@required this.method});
 
   String toString() {
     return method.toString().split(".")[1];
@@ -78,7 +79,12 @@ class HttpRequest {
   HttpProtocol protocol = HttpProtocol(protocol: Protocol.Http11);
   Option<Map<String, String>> headers = none();
   Option<Map<String, dynamic>> body = none();
-  HttpRequest({this.url, this.protocol, this.method, this.headers, this.body});
+  HttpRequest(
+      {@required this.url,
+      @required this.protocol,
+      @required this.method,
+      this.headers,
+      this.body});
 
   static Option<HttpRequest> fromString(String text) {
     final lines = text.split("\n").where((line) {

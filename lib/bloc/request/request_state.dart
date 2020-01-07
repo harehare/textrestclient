@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:text_rest_client/models/models.dart';
 
 class RequestState {
-  final Option<List<ReplResponse>> responses;
+  final Option<List<HttpResponse>> responses;
   final bool isFetching;
   final Option<CancelToken> token;
 

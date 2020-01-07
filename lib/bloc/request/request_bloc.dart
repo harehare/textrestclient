@@ -115,10 +115,10 @@ class RequestBloc extends Bloc<RequestEvent, RequestState> {
         .map((v) {
       return v.cata(
           () => Future.value(
-              ReplResponse(response: Left("Could not get any response"))),
+              HttpResponse(response: Left("Could not get any response"))),
           (vv) => vv
-              .then((r) => ReplResponse(response: Right(r)))
-              .catchError((e) => ReplResponse(response: Left(e.toString()))));
+              .then((r) => HttpResponse(response: Right(r)))
+              .catchError((e) => HttpResponse(response: Left(e.toString()))));
     }).toList();
 
     try {

@@ -11,7 +11,7 @@ import 'package:flushbar/flushbar.dart';
 import 'package:recase/recase.dart';
 
 class ResponseItem extends StatelessWidget {
-  final ReplResponse response;
+  final HttpResponse response;
   ResponseItem({
     Key key,
     @required this.response,
