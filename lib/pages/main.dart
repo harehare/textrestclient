@@ -2,26 +2,49 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart' as dartz;
 import 'package:text_rest_client/bloc/bloc.dart';
+import 'package:text_rest_client/models/models.dart';
 import 'package:text_rest_client/components/components.dart';
 import 'package:text_rest_client/utils.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/services.dart';
 import 'package:flushbar/flushbar.dart';
+import 'package:localstorage/localstorage.dart';
 
 class MainPage extends StatefulWidget {
   @override
   _MainPageState createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
   final _controller = TextEditingController();
   final _pageController = PageController();
+  final LocalStorage storage = LocalStorage('textrestclient');
   int _page = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    initAsyncState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  initAsyncState() async {
+    await storage.ready;
+    _controller.text = storage.getItem("text");
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      storage.setItem("text", _controller.text);
+    }
+  }
 
   @override
   void dispose() {
     _controller.dispose();
     _pageController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -36,7 +59,7 @@ class _MainPageState extends State<MainPage> {
             leading: IconButton(
                 iconSize: 24,
                 icon: Image.asset('assets/icon_64.png'),
-                onPressed: () {}),
+                onPressed: () => Navigator.of(context).pushNamed("/")),
             title: Text(
               "Text Rest Client",
               style: theme.textTheme.subhead,
@@ -53,13 +76,11 @@ class _MainPageState extends State<MainPage> {
                 },
               ),
               IconButton(
-                tooltip: "History",
-                color: theme.iconTheme.color,
-                icon: Icon(Icons.history),
-                onPressed: () {
-                  // TODO:
-                },
-              ),
+                  tooltip: "History",
+                  color: theme.iconTheme.color,
+                  icon: Icon(Icons.history),
+                  onPressed: () =>
+                      Navigator.of(context).pushNamed("/histories")),
               Theme(
                   data: Theme.of(context).copyWith(
                     cardColor: theme.backgroundColor,
@@ -155,17 +176,25 @@ class _MainPageState extends State<MainPage> {
                             ),
                             tooltip: "Send Request",
                             onPressed: () {
-                              BlocProvider.of<RequestBloc>(context).add(
-                                  SendEvent(
-                                      text: _controller.selection.start !=
-                                              _controller.selection.end
-                                          ? _controller.text.substring(
-                                              _controller.selection.start,
-                                              _controller.selection.end)
-                                          : _controller.text));
+                              final text = _controller.selection.start !=
+                                      _controller.selection.end
+                                  ? _controller.text.substring(
+                                      _controller.selection.start,
+                                      _controller.selection.end)
+                                  : _controller.text;
+                              BlocProvider.of<RequestBloc>(context)
+                                  .add(SendEvent(text: text));
                               if (Util.isPhone(size.width)) {
                                 _pageController.jumpToPage(1);
                               }
+                              storage.setItem("text", _controller.text);
+                              final requests = Util.parseText(text)
+                                  .where((v) => v.isSome())
+                                  .map((v) => v.cata(
+                                      () => HttpRequest.empty(), (vv) => vv))
+                                  .toList();
+                              BlocProvider.of<HistoryBloc>(context)
+                                  .add(AddEvent(requests: requests));
                             }),
                   ),
                 ])),
@@ -296,7 +325,7 @@ class _MainPageState extends State<MainPage> {
               child: state.responses.isNone() && !state.isFetching
                   ? Center(
                       child:
-                          Text("Response empty", style: theme.textTheme.body1))
+                          Text("Empty response", style: theme.textTheme.body1))
                   : state.isFetching
                       ? Center(
                           child: Text("Sending request...",

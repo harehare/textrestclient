@@ -10,10 +10,9 @@ import 'package:recase/recase.dart';
 
 class RequestItem extends StatelessWidget {
   final Option<HttpRequest> request;
-  RequestItem({
-    Key key,
-    @required this.request,
-  }) : super(key: key);
+  final bool matchWindow;
+  RequestItem({Key key, @required this.request, this.matchWindow = false})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +35,9 @@ class RequestItem extends StatelessWidget {
               TextSpan(text: 'Empty request\n', style: theme.textTheme.body1),
             ])))),
         (req) => Container(
-            width: Util.isPhone(size.width) ? size.width : size.width / 2,
+            width: Util.isPhone(size.width)
+                ? size.width
+                : size.width / (matchWindow ? 1 : 2),
             decoration: BoxDecoration(
                 border: Border(
                     bottom: BorderSide(color: theme.dividerColor, width: 2.0))),
@@ -79,12 +80,12 @@ class RequestItem extends StatelessWidget {
                     req.body.cata(() => Container(), (body) {
                       final text = body.containsKey("raw")
                           ? body["raw"]
-                          : json.encode(body);
+                          : JsonEncoder.withIndent('  ').convert(body);
                       return Container(
-                          height: max(150, Util.height(text)),
+                          height: max(100, Util.height(text)),
                           child: TabBarView(children: [
                             HighlightView(
-                              text,
+                              text != '' ? text : 'None',
                               language: 'json',
                               theme: vs2015Theme,
                               padding: EdgeInsets.all(8),

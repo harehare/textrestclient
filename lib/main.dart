@@ -4,28 +4,37 @@ import 'package:text_rest_client/pages/pages.dart';
 import 'package:text_rest_client/theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:text_rest_client/bloc/bloc.dart';
+import 'package:text_rest_client/repository/repository.dart';
+import 'package:easy_alert/easy_alert.dart';
 
 void main() {
   final router = Router();
+  //ignore: close_sinks
+  final historyBloc =
+      HistoryBloc(historyRepository: WebHistoryRepositoryImpl());
 
-  router.define('histories', handler: Handler(
-    handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-      // TODO:
-      return Container();
-    },
-  ), transitionType: TransitionType.material);
+  router.define('/histories',
+      handler: Handler(
+          handlerFunc: (BuildContext context, Map<String, dynamic> params) =>
+              MultiBlocProvider(providers: [
+                BlocProvider<HistoryBloc>(
+                    create: (context) => historyBloc..add(LoadEvent()))
+              ], child: HistoryPage())),
+      transitionType: TransitionType.material);
 
-  router.define('home', handler:
-      Handler(handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-    return BlocProvider<RequestBloc>(
-        create: (context) {
-          return RequestBloc();
-        },
-        child: MainPage());
-    ;
-  }), transitionType: TransitionType.material);
+  router.define('/',
+      handler: Handler(
+          handlerFunc: (BuildContext context, Map<String, dynamic> params) =>
+              MultiBlocProvider(providers: [
+                BlocProvider<RequestBloc>(create: (context) => RequestBloc()),
+                BlocProvider<HistoryBloc>(create: (context) => historyBloc)
+              ], child: MainPage())),
+      transitionType: TransitionType.material);
 
-  runApp(MyApp(router));
+  runApp(AlertProvider(
+    child: MyApp(router),
+    config: AlertConfig(ok: "OK", cancel: "Cancel"),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -38,7 +47,7 @@ class MyApp extends StatelessWidget {
       title: 'Text Rest Client',
       theme: themeData,
       onGenerateRoute: router.generator,
-      initialRoute: 'home',
+      initialRoute: '/',
     );
   }
 }

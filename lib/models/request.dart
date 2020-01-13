@@ -74,6 +74,7 @@ class HttpMethod {
 }
 
 class HttpRequest {
+  String comment;
   String url;
   HttpMethod method = HttpMethod(method: Method.GET);
   HttpProtocol protocol = HttpProtocol(protocol: Protocol.Http11);
@@ -83,6 +84,7 @@ class HttpRequest {
       {@required this.url,
       @required this.protocol,
       @required this.method,
+      this.comment,
       this.headers,
       this.body});
 
@@ -90,6 +92,10 @@ class HttpRequest {
     final lines = text.split("\n").where((line) {
       return line != "" && !line.startsWith("#");
     }).toList();
+
+    final comment = text.split("\n").where((line) {
+      return line != "" && line.startsWith("#");
+    }).join('\n');
 
     final method = catching(() {
       final tokens = lines.first.split(" ");
@@ -132,6 +138,7 @@ class HttpRequest {
           body: body,
           protocol: protocol,
           method: method,
+          comment: comment,
           headers: headers,
           url: v));
     });
@@ -181,12 +188,47 @@ class HttpRequest {
           case "multipart/form-data":
             return some(json.encode(b));
           default:
-            return some(json.encode(b));
+            return some(b.containsKey('raw') ? b['raw'] : json.encode(b));
         }
       });
     });
-    return "$httpMethod $url\n$headersString\n${bodyString?.getOrElse(() => '')}";
+    return "$comment\n$httpMethod $url\n$headersString\n${bodyString?.getOrElse(() => '')}";
   }
+
+  factory HttpRequest.empty() => HttpRequest(
+      url: "",
+      protocol: HttpProtocol(protocol: Protocol.Http11),
+      method: HttpMethod(method: Method.GET));
+
+  factory HttpRequest.fromJson(Map data) {
+    final Map<String, String> headers = data['headers'] is Map
+        ? (data['headers'] as Map)
+            .map((k, v) => MapEntry(k.toString(), v.toString()))
+        : <String, String>{};
+
+    final Map<String, String> body = data['body'] is Map
+        ? (data['body'] as Map)
+            .map((k, v) => MapEntry(k.toString(), v.toString()))
+        : <String, String>{};
+
+    return HttpRequest(
+      url: data['url'],
+      method: HttpMethod.fromString(data['method']),
+      protocol: HttpProtocol.fromString(data['protocol']),
+      comment: data['comment'],
+      headers: some(headers),
+      body: some(body),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'url': url,
+        'method': method.toString(),
+        'protocol': protocol.toString(),
+        'comment': comment,
+        'headers': headers.cata(() => {}, (h) => h),
+        'body': body.cata(() => {}, (b) => b),
+      };
 
   @override
   bool operator ==(other) =>
